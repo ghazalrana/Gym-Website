@@ -14,8 +14,8 @@ jobs:
       - run: |
           gcloud auth configure-docker --quiet
           SHORT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)      
-          docker build -t eu.gcr.io/trainingvideos/simpleapp:${SHORT_HASH} .
-          docker push eu.gcr.io/trainingvideos/simpleapp:${SHORT_HASH}
+          docker build -t gcr.io/websocket-285908/gym-circleci:${SHORT_HASH} .
+          docker push gcr.io/websocket-285908/gym-circleci:${SHORT_HASH}
   deploy:
     docker:
       - image: google/cloud-sdk  
@@ -25,30 +25,11 @@ jobs:
           command: |
             echo $GCLOUD_CREDENTIALS > ${HOME}/gcloud-service-key.json
             gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
-            gcloud container clusters get-credentials docker-to-k8s-demo --zone europe-north1-a --project trainingvideos
+            gcloud container clusters get-credentials circleci-testing --zone us-central1-c --project websocket-285908
+
 
       - checkout             
       - run: |
-
-          echo ${SIMPLEAPP_CONF} > simpleapp.conf
-
-          echo "First, deleting the old configmap: configmap-simpleapp-conf"
-          kubectl delete configmap configmap-simpleapp-conf || true
-
-          echo "Creating the new configmap: configmap-simpleapp-conf - using CircleCI environment variable"
-          kubectl create  configmap configmap-simpleapp-conf --from-file=simpleapp.conf
-
-
-          echo "First, deleting the old secret: simpleapp-credentials"
-          kubectl delete secret simpleapp-credentials || true
-
-          echo "Creating kubernetes secret: simpleapp-credentials - using CircleCI Environment variables"
-
-          kubectl create secret generic simpleapp-credentials \
-            --from-literal=MYSQL_HOST=${MYSQL_HOST} \
-            --from-literal=MYSQL_DATABASE=${MYSQL_DATABASE} \
-            --from-literal=MYSQL_USER=${MYSQL_USER} \
-            --from-literal=MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
 
           SHORT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)      
