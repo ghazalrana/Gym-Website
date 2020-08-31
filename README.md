@@ -47,3 +47,14 @@ After setting permissions, create a key for this service account, by using "Crea
 Open circleCI dashboard
 
 We setup GCLOUD_CREDENTIALS as environment variable . In the Project settings of this project, go to Environment variables, and add an environment variable called GCLOUD_CREDENTIALS. Copy the text of the JSON file from the text terminal and paste it in as a value for this variable.
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+tutorials:
+
+https://github.com/ghazalrana/docker-to-kubernetes/blob/master/Migration-Part-3.md
+
+https://www.youtube.com/watch?v=xxDRg9DLME8&list=PLxv9HL8TPbSxBEjcHPwTjvYBfioVmtT1W&index=3
+
+
