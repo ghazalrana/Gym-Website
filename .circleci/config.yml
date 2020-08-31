@@ -1,56 +1,13 @@
-version: 2
-jobs:
-  build:
-    docker:
-      - image: google/cloud-sdk
-    steps: 
-      - run: 
-          name: authenticate with gcloud
-          command: |
-            echo $GCLOUD_CREDENTIALS > ${HOME}/gcloud-service-key.json
-            gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
-      - checkout             
-      - setup_remote_docker
-      - run: |
-          gcloud auth configure-docker --quiet
-          SHORT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)      
-          docker build -t gcr.io/websocket-285908/gym-circleci:${SHORT_HASH} .
-          docker push gcr.io/websocket-285908/gym-circleci:${SHORT_HASH}
-  deploy:
-    docker:
-      - image: google/cloud-sdk  
-    steps: 
-      - run: 
-          name: authenticate with gcloud
-          command: |
-            echo $GCLOUD_CREDENTIALS > ${HOME}/gcloud-service-key.json
-            gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
-            gcloud container clusters get-credentials circleci-testing --zone us-central1-c --project websocket-285908
-
-
-      - checkout             
-      - run: |
-
-
-          SHORT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)      
-          echo "SHORT_HASH is: ${SHORT_HASH}"
-
-          sed  s/SHORT_HASH/$SHORT_HASH/ deployment.yaml.template > deployment.yaml
-
-          kubectl apply -f deployment.yaml 
-          kubectl apply -f service-ingress.yaml
-
+# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+# Use a package of configuration called an orb.
+orbs:
+  # Declare a dependency on the welcome-orb
+  welcome: circleci/welcome-orb@0.4.1
+# Orchestrate or schedule a set of jobs
 workflows:
-  version: 2
-  build-and-deploy:
-    jobs: 
-      - build:
-          filters:
-            branches: 
-              only: master
-      - deploy:
-          requires:
-            - build
-          filters:
-            branches: 
-              only: master
+  # Name the workflow "welcome"
+  welcome:
+    # Run the welcome/run job in its own container
+    jobs:
+      - welcome/run
